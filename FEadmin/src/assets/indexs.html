@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiệu ứng đánh máy</title>
+    <style>
+        .typewriter {
+            font-family: monospace;
+            font-size: 24px;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 2px solid black;
+        }
+    </style>
+</head>
+<body>
+    <div class="typewriter" id="text"></div>
+
+    <script>
+        const textElement = document.getElementById('text');
+        const text = "Xin chào, đây là hiệu ứng đánh máy!";
+        let index = 0;
+
+        function typeWriter() {
+            if (index < text.length) {
+                textElement.innerHTML += text.charAt(index);
+                index++;
+                setTimeout(typeWriter, 100); 
+            }
+        }
+        typeWriter();
+    </script>
+</body>
+</html>
