@@ -36,7 +36,7 @@ const Banner = () => {
     <Swiper
       loop={true}
       spaceBetween={0}
-      navigation={true}
+      navigation={false}
       pagination={{ clickable: true, el: ".swiper-pagination" }}
       modules={[Navigation, Pagination, Autoplay]}
       autoplay={{

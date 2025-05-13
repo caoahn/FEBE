@@ -11,6 +11,7 @@ const UserMain = lazy(() => import("../layouts/user/user-main"));
 const Login = lazy(() => import("../components/Login"));
 const CreateUser = lazy(() => import("../layouts/user/CreateUser"));
 const Contact = lazy(() => import("../layouts/contact/contact"));
+const OrderHistory = lazy(() => import("../layouts/orders/order"));
 import ProtectedRoute from "../components/Protected";
 
 const router = createBrowserRouter([
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
       { path: "/users", element: <UserMain /> },
       { path: "/users/create/:id?", element: <CreateUser /> },
       { path: "/contact", element: <Contact /> },
+      { path: "/orders", element: <OrderHistory /> },
       { path: "*", element: <ErrorPage /> },
     ]
   }

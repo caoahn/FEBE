@@ -164,7 +164,9 @@ const ShopSection = () =>  {
                         <img src={item.image.url} alt={item.name} className="w-full h-60 object-cover rounded-md" />
                         <h3 className="mt-4 text-xl font-semibold">{item.name}</h3>
                         <Rating value={3} text={`0 review`} />
-                        <p className="text-lg text-green-600 font-bold mt-2">{item.price} VND</p>
+                        <p className="text-lg text-green-600 font-bold mt-2">
+                          {item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                        </p>
                       </div>
                     </Link>
                   </div>

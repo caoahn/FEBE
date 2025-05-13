@@ -81,17 +81,19 @@ const Contact = () => {
                   <div className="w-full md:w-1/2">
                     <div className="flex items-center gap-2">
                       <MapPin className="text-blue-700" />
-                      <p className="text-gray-800">ADDRESS</p>
+                      <p className="text-gray-800">ADDRESS : Q28 Ha Noi </p>
+
                     </div>
                   </div>
                   <div className="w-full md:w-1/2">
                     <div className="flex items-center gap-2">
                       <Phone className="text-blue-700" />
-                      <a className="text-gray-800">PHONE</a>
+                      <a className="text-gray-800">PHONE : +84 123456789</a>
+
                     </div>
                     <div className="flex items-center gap-2 mt-4">
                       <Mail className="text-blue-700" />
-                      <a className="text-gray-800 hover:underline">EMAIL</a>
+                      <a className="text-gray-800 hover:underline">EMAIL : caotanh04@gmail.com</a>
                     </div>
                   </div>
                 </div>

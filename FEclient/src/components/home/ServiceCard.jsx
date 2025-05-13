@@ -10,10 +10,10 @@ import {
 
 const ServiceCard = ({index,service}) => {
   return (
-    <Card key={index} className="group mt-10 relative max-w-[18rem] w-[17rem] overflow-hidden border border-solid border-blue-200 h-[40rem]">
+    <Card key={index} className="group mt-10 relative max-w-[18rem] w-[17rem] overflow-hidden border border-solid border-blue-200 h-[35rem]">
       <div
         className="absolute inset-0 bg-cover bg-center opacity-0 z-20 flex items-center justify-center text-center transition-opacity duration-300 group-hover:opacity-100"
-        style={{ backgroundImage: `url(${service?.image?.url})` }}
+        // style={{ backgroundImage: `url(${service?.image?.url})` }}
       >
         {/* <Typography
           variant="h5"
@@ -36,13 +36,13 @@ const ServiceCard = ({index,service}) => {
             className="w-full h-full rounded-md object-cover"
           />
           <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-black/60 to-transparent rounded-md"></div>
-          <div className="absolute bottom-2 left-5 text-white font-bold text-2xl pr-40">
+          <div className="absolute bottom-2 left-5 text-white font-bold text-[20px] pr-10">
             {service.name}
           </div>
         </div>
       </CardHeader>
       <CardBody className="z-10 relative p-auto h-[100%]">
-        <Typography variant="lead" color="gray" className="mt-3 font-normal">
+        <Typography variant="lead" color="gray" className="mt-3 font-normal text-[16px]">
           {service.description}
         </Typography>
       </CardBody>

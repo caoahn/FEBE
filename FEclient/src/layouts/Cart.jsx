@@ -6,6 +6,9 @@ import Footer from "../components/Footer";
 import { useParams } from "react-router-dom";
 import ProductApi from "../apis/productApi";
 import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import StripeApi from "../apis/stripeApi";
+import { loadStripe } from '@stripe/stripe-js';
 
 const Cart = () =>  {
   window.scrollTo(0, 0);
@@ -14,6 +17,9 @@ const Cart = () =>  {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const qty = searchParams.get("qty") ? Number(searchParams.get("qty")) : 1;
+  const [product, setProduct] = useState();
+  const stripePromise = loadStripe('pk_test_51RIQd0B0ADzeXvfTp2Dg90GG3MAqxZ0D1UTjyCaiGHA4y52iU04M0lu64RlLbHOiXMNNVp2qUTKltgR9D7r5wnFQ006t5BWsGc');
+  const userInfo = localStorage.getItem("userInfo") ? JSON.parse(localStorage.getItem("userInfo")) : null;
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cartItems")) ? JSON.parse(localStorage.getItem("cartItems")) : [];
@@ -24,26 +30,45 @@ const Cart = () =>  {
     try {
       const { data } = await ProductApi.getInfoProduct(id);
       const productWithQty = { ...data, qty };
-      setCartItems((prevCartItems) => {
-        const updatedCart = updateCartItems(prevCartItems, productWithQty);
+  
+      setProduct([productWithQty]);
+  
+      setCartItems((prev) => {
+        const existingProduct = prev.find((item) => item._id === productWithQty._id);
+  
+        let updatedCart;
+        if (existingProduct) {
+          updatedCart = prev.map((item) =>
+            item._id === productWithQty._id ? { ...item, qty: qty } : item
+          );
+        } else {
+          updatedCart = [...prev, productWithQty];
+        }
+  
         localStorage.setItem("cartItems", JSON.stringify(updatedCart));
         return updatedCart;
       });
-      navigate("/cart");
     } catch (error) {
       console.error("Lỗi khi lấy thông tin sản phẩm:", error);
     }
   };
-
-  const updateCartItems = (cart, newItem) => {
-    const existItem = cart.find((item) => item._id === newItem._id);
-    if (existItem) {
-      return cart.map((item) =>
-        item._id === newItem._id ? { ...item, qty: item.qty + newItem.qty } : item
-      );
-    }
-    return [...cart, newItem];
-  };
+  
+  const createCheckoutSession = useMutation({
+    mutationFn: StripeApi.createCheckoutSession,
+    onSuccess: async (data) => {
+      localStorage.setItem("customerId", data.data.customerId);
+      const stripe = await stripePromise;
+      const result = await stripe.redirectToCheckout({
+        sessionId: data.data.id,
+      });
+      if (result.error) {
+        console.error("Lỗi khi chuyển hướng đến thanh toán:", result.error.message);
+      }
+    },
+    onError: (error) => {
+      console.error("Lỗi khi tạo phiên thanh toán:", error);
+    },
+   })
 
   const handleQtyChange = (id, qty) => {
     setCartItems((prevCartItems) => {
@@ -61,8 +86,20 @@ const Cart = () =>  {
     localStorage.setItem("cartItems", JSON.stringify(updatedCart));
   };
 
-  const checkOutHandler = () => {
-    navigate("/login?redirect=shipping");
+  const checkOutHandler = (e) => {
+    const cartData = cartItems.map((item) => ({
+      name: item.name,
+      price: item.price,
+      quantity: item.qty,
+      image: item.image.url,
+    }));
+    const customerEmail = userInfo.email;
+    createCheckoutSession.mutate({
+      products: cartData,
+      customerEmail: customerEmail
+    },
+  );
+    localStorage.removeItem("cartItems");
   };
 
   useEffect(() => {
@@ -71,7 +108,7 @@ const Cart = () =>  {
     }
   }, []);
 
-  const total = cartItems.reduce((a, item) => a + item.qty * item.price, 0).toFixed(2);
+  const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
   
   return (
     <>
@@ -138,9 +175,9 @@ const Cart = () =>  {
                       <h6 className="text-lg font-semibold mb-2 text-black flex justify-start">
                         PRICE
                       </h6>
-                      <h4 className="text-lg font-semibold text-green-700">
-                        ${item.price}
-                      </h4>
+                      <h6 className="text-lg font-semibold text-green-600">
+                        {item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                      </h6>
                     </div>
                   </div>
                 )
@@ -153,8 +190,8 @@ const Cart = () =>  {
                 <span className="text-3xl font-semibold text-gray-800 px-4">
                   Total:
                 </span>
-                <span className="text-3xl font-semibold text-green-900">
-                  {total}$
+                <span className="text-3xl font-semibold text-green-600">
+                  {total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                 </span>
               </div>
             </div>
@@ -168,7 +205,7 @@ const Cart = () =>  {
               {
                 2 > 0 && (
                   <div>
-                    <button className="bg-blue-500 text-white px-20 py-4 my-4 w-[350px]">
+                    <button className="bg-blue-500 text-white px-20 py-4 my-4 w-[350px]" onClick={checkOutHandler} >
                       Checkout
                     </button>
                   </div>

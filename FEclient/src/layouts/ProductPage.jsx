@@ -101,7 +101,12 @@ const ProductPage = () => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center border-b pb-2">
                   <h6 className="text-lg font-medium">Price</h6>
-                  <span className="text-lg font-semibold">${product.price}</span>
+                  <span className="text-green-600 font-semibold">
+                    {product.price.toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    })}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center border-b pb-2">

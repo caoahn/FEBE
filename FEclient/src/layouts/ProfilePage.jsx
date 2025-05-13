@@ -7,44 +7,41 @@ import Header from '../components/Header';
 import { useQuery} from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import UploadImage from '../apis/apiUploadImage';
+import OrderHistory from './OrderHistory';
 
 const ProfilePage = () =>  {
   const [activeTab, setActiveTab] =  useState("profile");
   const [showNotification, setShowNotification] = useState(false);
-  const orders = [
-    {
-      "shippingAddress": {
-          address: "ha noi",
-          city: "ha noi",
-          postalCode: "10020",
-          country: "vietnam"
-      },
-      _id: "67b5e771b3726c34d8e3736f",
-      user: "67b08e408b5f80f9140a6b4e",
-      orderItems: [
-        {
-            name: "qweqe",
-            qty: 1,
-            image: {
-                public_id: "ShoeShop/nngql4zbem4be3mh2uer",
-                url: "https://res.cloudinary.com/djrnau5bl/image/upload/v1739625353/ShoeShop/nngql4zbem4be3mh2uer.jpg"
-            },
-            price: 567,
-            product: "67b0938b8b5f80f9140a6ba5",
-            _id: "67b5e771b3726c34d8e37370"
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const customerId = localStorage.getItem("customerId")
+  useEffect(() => {
+      async function fetchOrders() {
+        try {
+          setLoading(true);
+          // Nếu bạn có customer ID
+          if (customerId) {
+            const response = await fetch(`http://localhost:5000/api/checkout-sessions?customer=${customerId}`);
+            const data = await response.json();
+            setOrders(data);
+          } else {
+            // Không có customer ID - hiển thị tất cả sessions (chỉ nên dùng cho admin)
+            const response = await fetch(`http://localhost:5000/api/checkout-sessions?limit=20`);
+            const data = await response.json();
+            setOrders(data);
+          }
+        } catch (err) {
+          console.error('Lỗi khi lấy lịch sử đơn hàng:', err);
+          setError('Không thể tải lịch sử đơn hàng. Vui lòng thử lại sau.');
+        } finally {
+          setLoading(false);
         }
-      ],
-      paymentMethod: "Paypal",
-      taxPrice: 56.7,
-      shippingPrice: 0,
-      totalPrice: 623.7,
-      isPaid: false,
-      isDelivered: false,
-      createdAt: "2025-02-19T14:15:13.225Z",
-      updatedAt: "2025-02-19T14:15:13.225Z",
-      __v: 0
-  }
-  ]
+      }
+      
+      fetchOrders();
+    }, [customerId]);
+
+    console.log(orders)
 
   const userInfo = localStorage.getItem("userInfo")
     ? JSON.parse(localStorage.getItem("userInfo"))
@@ -115,7 +112,7 @@ const ProfilePage = () =>  {
 
           <div className="lg:w-2/3 w-full pb-5 lg:pt-0 pt-3">
           {activeTab === "profile" && <ProfileTabs />}
-          {activeTab === "orders" && <Orders orders={orders} />}
+          {activeTab === "orders" && <OrderHistory customerId={customerId} />}
         </ div>
         </div>
       </div>

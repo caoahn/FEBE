@@ -6,6 +6,8 @@ const uploadRoutes = require("./upload.route");
 const importData = require("../DataImport");
 const customRoutes = require("./custom.route")
 const contactRoutes = require("./contact.route")
+const paymentRoutes = require("./payment.route")
+const stripeRoutes = require("./stripe.route")
 
 module.exports = (app) => {
   app.use("/api/import", importData);
@@ -23,5 +25,7 @@ module.exports = (app) => {
   app.use("/api/upload", uploadRoutes);
 
   app.use("/api/contacts", contactRoutes);
+
+  app.use("/api/payment1", paymentRoutes);
 
 };

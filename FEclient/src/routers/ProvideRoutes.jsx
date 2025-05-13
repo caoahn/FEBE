@@ -18,6 +18,9 @@ const EmailOtpForm = lazy(() => import("../layouts/InputEmail"));
 const Product = lazy(() => import("../layouts/Product"))
 const Contact = lazy(() => import("../layouts/Contact"));
 const AboutUs = lazy(() => import("../layouts/AboutUs"));
+const AboutUsPage = lazy(() => import("../layouts/AboutUss"));
+const CheckoutPage = lazy(() => import("../layouts/CheckOut"));
+import PaymentSuccess from "../components/PaymentSuccess";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +41,8 @@ const router = createBrowserRouter([
       { path: "/reset-password", element: <Reset/> },
       { path: "/contact", element: <Contact/> },
       { path: "/about-us", element: <AboutUs/> },
+      { path: "checkout", element: <CheckoutPage/> },
+      { path: "/payment-success", element: <PaymentSuccess/> },
       { path: "*", element: <ErrorPage /> },
     ]
   }

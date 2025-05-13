@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import { FaPen, FaTrashAlt } from 'react-icons/fa';
 
 const ProductCard = ({product, key, handleDelete}) => {
+  const formatPrice = (price) => {
+    return price.toLocaleString('vi-VN');
+  };
+
   return (
     <>
       <div className="w-full sm:w-6/12 lg:w-3/12 mb-5 px-2">
@@ -24,7 +28,9 @@ const ProductCard = ({product, key, handleDelete}) => {
               </div>
             </div>
             <div className="text-gray-700 text-base font-medium mb-3">
-              ${product.price}
+              <span className="text-red-500 font-bold">
+                {product.price ? formatPrice(product.price) : 0} đ
+              </span>
             </div>
             <div className="flex gap-2">
               <a

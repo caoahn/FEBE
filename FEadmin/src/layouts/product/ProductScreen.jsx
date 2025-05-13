@@ -7,6 +7,7 @@ import CategoryApi from "../../apis/categoryApi";
 import ProductApi from "../../apis/productApi";
 import { ToastContainer } from "react-toastify";
 import { ToastService } from "../../utils/toast";
+import Pagination from "../../components/Pagination";
 
 const ProuctScreen = () => {
   const [categories, setCategories] = useState([]);
@@ -14,6 +15,15 @@ const ProuctScreen = () => {
   const [searchProduct, setSearchProduct] = useState("");
   const [idCategory, setIdCategory] = useState("");
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(8);
+  const [sortChoose, setSortChoose] = useState([
+    "Latest added",
+    "Oldest added", 
+    "Price: low -> high",
+    "Price: high -> low"
+  ]);
+  const [selectedSort, setSelectedSort] = useState("");
 
   const { data: category, isLoading, error } = useQuery({
     queryKey: ["categories"],
@@ -50,7 +60,8 @@ const ProuctScreen = () => {
 
   useEffect(() => {
     if(category) {
-      setCategories(category);
+      const filteredCategories = category.filter(item => item.display_order !== 2)
+      setCategories(filteredCategories);
     }
     if(product) {
       setProducts(product);
@@ -78,12 +89,57 @@ const ProuctScreen = () => {
     }
   }
 
-  const [sortChoose] = useState([
-    "Latest added",
-    "Oldest added",
-    "Price: low -> high",
-    "Price: hight -> low",
-  ]);
+  // Sorting function
+  const sortProducts = (productsToSort, sortType) => {
+    if (!productsToSort) return [];
+
+    switch(sortType) {
+      case "Latest added":
+        return [...productsToSort].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      case "Oldest added":
+        return [...productsToSort].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      case "Price: low -> high":
+        return [...productsToSort].sort((a, b) => a.price - b.price);
+      case "Price: high -> low":
+        return [...productsToSort].sort((a, b) => b.price - a.price);
+      default:
+        return productsToSort;
+    }
+  }
+
+  // Handle sort change
+  const handleSortChange = (sortType) => {
+    setSelectedSort(sortType);
+  }
+
+  // Apply sorting and filtering
+  const filteredAndSortedProducts = useMemo(() => {
+    let result = product || [];
+
+    // Filter by category if selected
+    if (idCategory) {
+      result = result.filter(p => p.category === idCategory);
+    }
+
+    // Filter by search
+    if (searchProduct) {
+      result = result.filter(p => 
+        p.name.toLowerCase().includes(searchProduct.toLowerCase())
+      );
+    }
+
+    // Sort products
+    result = sortProducts(result, selectedSort);
+
+    return result;
+  }, [product, idCategory, searchProduct, selectedSort]);
+
+  // Pagination
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredAndSortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <>
@@ -99,7 +155,7 @@ const ProuctScreen = () => {
       <div className="bg-white shadow-sm mb-4 border border-gray-300">
         <header className="border-b p-4">
           <div className="flex flex-wrap gap-4">
-            {/* Ô tìm kiếm */}
+            {/* Search input */}
             <div className="flex-1 min-w-[200px]">
               <input
                 type="search"
@@ -109,12 +165,15 @@ const ProuctScreen = () => {
               />
             </div>
 
-            {/* Danh mục */}
+            {/* Category dropdown */}
             <div className="min-w-[150px]">
                 <select
                   name="category"
                   className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  onChange={(e) => {
+                    setIdCategory(e.target.value);
+                    handleCategoryChange(e.target.value);
+                  }}
                 >
                   <option value="">Select a category</option>
                   {categories.map((category) => (
@@ -125,12 +184,12 @@ const ProuctScreen = () => {
                 </select>
             </div>
 
-            {/* Sắp xếp */}
+            {/* Sort dropdown */}
             <div className="min-w-[150px]">
               <select
                 name="sort"
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                // onChange={handleSortChange}
+                onChange={(e) => handleSortChange(e.target.value)}
               >
                 <option value="">Select a sort</option>
                 {sortChoose.map((sort) => (
@@ -145,16 +204,14 @@ const ProuctScreen = () => {
 
         {/* Body */}
         <div className="p-4">
-          {/* {errorDelete && (
-            <Message variant="alert-danger">{errorDelete}</Message>
-          )}
-          {errorDeleteImage && (
-            <Message variant="alert-danger">{errorDeleteImage}</Message>
-          )} */}
           <div className="flex flex-row flex-wrap">
-            {products.length ? (
-              products.map((product) => (
-                <ProductCard product={product} key={product._id} handleDelete={handleDelete} />
+            {filteredAndSortedProducts.length ? (
+              currentProducts.map((product) => (
+                <ProductCard 
+                  product={product} 
+                  key={product._id} 
+                  handleDelete={handleDelete} 
+                />
               ))
             ) : (
               <div className="col-span-full text-center">
@@ -164,6 +221,12 @@ const ProuctScreen = () => {
               </div>
             )}
           </div>
+          <Pagination
+            productsPerPage={productsPerPage}
+            totalProducts={filteredAndSortedProducts.length}
+            currentPage={currentPage}
+            paginate={paginate}
+          />
         </div>
       </div>
       </section>

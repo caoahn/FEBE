@@ -1,139 +1,55 @@
 import TopTotal from "../components/home/Total";
 import LatestOrder from "../components/home/LatestOrder";
+import { useEffect, useState } from 'react';
+import { useQuery} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import ProductApi from "../apis/productApi";
+
 function HomePage() {
+    const [orders, setOrders] = useState([]);
+    const [limit, setLimit] = useState(3);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [products, setProducts] = useState([]);
 
-    const orders = [
-        {
-            shippingAddress: {
-                address: "ha noi",
-                city: "ha noi",
-                postalCode: "10020",
-                country: "vietnam"
-            },
-            _id: "67b9df15af145f96d59ce0b4",
-            user: {
-                _id: "67b08e408b5f80f9140a6b4e",
-                name: "canhhh",
-                email: "caotanh04@gmail.com"
-            },
-            orderItems: [
-                {
-                    name: "lalal",
-                    qty: 1,
-                    image: {
-                        public_id: "ShoeShop/imm2c5r6axlcftvg7zud",
-                        url: "https://res.cloudinary.com/djrnau5bl/image/upload/v1739625528/ShoeShop/imm2c5r6axlcftvg7zud.jpg"
-                    },
-                    price: 123,
-                    product: "67b0943b8b5f80f9140a6bec",
-                    _id: "67b9df15af145f96d59ce0b5"
-                }
-            ],
-            paymentMethod: "Paypal",
-            taxPrice: 12.3,
-            shippingPrice: 10,
-            totalPrice: 145.3,
-            isPaid: false,
-            isDelivered: false,
-            createdAt: "2025-02-22T14:28:37.788Z",
-            updatedAt: "2025-02-22T14:28:37.788Z",
-            __v: 0
-        },
-        {
-            shippingAddress: {
-                address: "ha noi",
-                city: "ha noi",
-                postalCode: "10020",
-                country: "vietnam"
-            },
-            _id: "67b9df15af145f96d59ce0b4",
-            user: {
-                _id: "67b08e408b5f80f9140a6b4e",
-                name: "canhhh",
-                email: "caotanh04@gmail.com"
-            },
-            orderItems: [
-                {
-                    name: "lalal",
-                    qty: 1,
-                    image: {
-                        public_id: "ShoeShop/imm2c5r6axlcftvg7zud",
-                        url: "https://res.cloudinary.com/djrnau5bl/image/upload/v1739625528/ShoeShop/imm2c5r6axlcftvg7zud.jpg"
-                    },
-                    price: 123,
-                    product: "67b0943b8b5f80f9140a6bec",
-                    _id: "67b9df15af145f96d59ce0b5"
-                }
-            ],
-            paymentMethod: "Paypal",
-            taxPrice: 12.3,
-            shippingPrice: 10,
-            totalPrice: 145.3,
-            isPaid: false,
-            isDelivered: false,
-            createdAt: "2025-02-22T14:28:37.788Z",
-            updatedAt: "2025-02-22T14:28:37.788Z",
-            __v: 0
-        },
-        {
-            shippingAddress: {
-                address: "ha noi",
-                city: "ha noi",
-                postalCode: "10020",
-                country: "vietnam"
-            },
-            _id: "67b9df15af145f96d59ce0b4",
-            user: {
-                _id: "67b08e408b5f80f9140a6b4e",
-                name: "canhhh",
-                email: "caotanh04@gmail.com"
-            },
-            orderItems: [
-                {
-                    name: "lalal",
-                    qty: 1,
-                    image: {
-                        public_id: "ShoeShop/imm2c5r6axlcftvg7zud",
-                        url: "https://res.cloudinary.com/djrnau5bl/image/upload/v1739625528/ShoeShop/imm2c5r6axlcftvg7zud.jpg"
-                    },
-                    price: 123,
-                    product: "67b0943b8b5f80f9140a6bec",
-                    _id: "67b9df15af145f96d59ce0b5"
-                }
-            ],
-            paymentMethod: "Paypal",
-            taxPrice: 12.3,
-            shippingPrice: 10,
-            totalPrice: 145.3,
-            isPaid: false,
-            isDelivered: false,
-            createdAt: "2025-02-22T14:28:37.788Z",
-            updatedAt: "2025-02-22T14:28:37.788Z",
-            __v: 0
-        }
-    ]
+    const { data: product, isLoading: isLoadingProducts, error: errorProducts } = useQuery({
+    queryKey: ["products"],
+    queryFn: () => ProductApi.getAllProducts(),
+  })
 
-    const products = [
-        {
-            _id: "67c3103a7c22dd4dba5b3ee6",
-            name: "sản phẩm 2",
-            image: {
-                public_id: "ShoeShop/m7hh6vq60xcgbbasmudt",
-                url: "https://res.cloudinary.com/djrnau5bl/image/upload/v1740836921/ShoeShop/m7hh6vq60xcgbbasmudt.jpg"
-            },
-            description: "heheh",
-            rating: 0,
-            numReviews: 0,
-            category: "67b091fe8b5f80f9140a6b86",
-            price: 23,
-            countInStock: 23,
-            reviews: [],
-            createdAt: "2025-03-01T13:48:42.605Z",
-            updatedAt: "2025-03-01T13:48:42.605Z",
-            __v: 0
-        },
-        
-    ]
+    const fetchOrders = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch(`http://localhost:5000/api/checkout-sessions?limit=${limit}`);
+      if (!response.ok) throw new Error('Failed to fetch orders');
+      const data = await response.json();
+      setOrders(data);
+    } catch (err) {
+      setError(err.message || 'Error fetching orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount, currency) => {
+    const formatter = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: currency || 'VND'
+    });
+    return formatter.format(amount);
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, [limit]);
+
+  useEffect(() => {
+    if(product) {
+      setProducts(product);
+    }
+  }, [product])
+
     return (
         <div className="">
             <section className="px-[3%] py-[30px] mx-auto">
@@ -164,7 +80,35 @@ function HomePage() {
 
                 <div>
                     <div className="bg-white shadow-md rounded-lg mb-4 boder">
-                        <LatestOrder orders={orders} loading={false} error={false} />
+                        <table className="min-w-full bg-white">
+                            <thead>
+                            <tr className="bg-white-100 text-gray-700 uppercase text-sm leading-normal">
+                                <th className="py-3 px-6 text-left">Order ID</th>
+                                <th className="py-3 px-6 text-left">Amount</th>
+                                <th className="py-3 px-6 text-left">Status</th>
+                                <th className="py-3 px-6 text-left">Created</th>
+                            </tr>
+                            </thead>
+                            <tbody className="text-gray-600 text-sm">
+                            {orders.map((order, index) => (
+                                <tr
+                                key={order.id}
+                                className={`border-b hover:bg-gray-50 ${
+                                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                                }`}
+                                >
+                                <td className="py-3 px-6">{order.id}</td>
+                                <td className="py-3 px-6">
+                                    {formatCurrency(order.amount_total, order.currency)}
+                                </td>
+                                <td className="py-3 px-6 capitalize">{order.payment_status}</td>
+                                <td className="py-3 px-6">
+                                    {new Date(order.created * 1000).toLocaleString()}
+                                </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>

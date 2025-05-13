@@ -20,7 +20,7 @@ const AboutUs = () => {
       <BannerProduct images={images}/>
       <section className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Tiêu đề */}
+       
         <div className="text-center">
           <h2 className="text-4xl mt-10 md:text-5xl font-extrabold text-gray-900 bg-gradient-to-r from-gray-900 to-indigo-600 bg-clip-text text-transparent drop-shadow-lg">
             About Shop Shoe
